@@ -10,7 +10,16 @@ import 'package:teamstream/pages/requests.dart';
 import 'package:teamstream/pages/documents.dart';
 import 'package:teamstream/pages/checklists.dart';
 
+// ✅ Import WebView dependencies
+import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter_android/webview_flutter_android.dart'; // ✅ Fix for Android WebView
+
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // ✅ Properly Initialize WebView for Android
+  WebViewPlatform.instance = SurfaceAndroidWebView();
+
   runApp(const MyApp());
 }
 

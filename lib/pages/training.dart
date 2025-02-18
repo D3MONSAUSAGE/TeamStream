@@ -57,7 +57,9 @@ class TrainingPageState extends State<TrainingPage>
 // 🔹 TRAINING PROGRESS TAB
 // --------------------------------------
 class TrainingProgressTab extends StatelessWidget {
-  final double trainingCompletion = 0.65; // Example: 65% complete
+  final double trainingCompletion = 0.65;
+
+  const TrainingProgressTab({super.key}); // Example: 65% complete
 
   @override
   Widget build(BuildContext context) {
@@ -130,6 +132,8 @@ class QuizzesTab extends StatelessWidget {
     {"title": "POS System Training", "status": "Not Started"},
   ];
 
+   QuizzesTab({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -192,6 +196,8 @@ class TrainingMaterialsTab extends StatelessWidget {
     {"title": "Customer Service Excellence", "link": "#"},
     {"title": "POS System User Guide", "link": "#"},
   ];
+
+   TrainingMaterialsTab({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:teamstream/widgets/menu_drawer.dart';
-import 'package:teamstream/services/pocketbase_service.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:fl_chart/fl_chart.dart';
 
 class FinancePage extends StatefulWidget {
@@ -59,6 +57,8 @@ class FinancePageState extends State<FinancePage>
 }
 
 class FixedCostsTab extends StatefulWidget {
+  const FixedCostsTab({super.key});
+
   @override
   _FixedCostsTabState createState() => _FixedCostsTabState();
 }
@@ -150,6 +150,8 @@ class _FixedCostsTabState extends State<FixedCostsTab> {
 }
 
 class DailySalesTab extends StatelessWidget {
+  const DailySalesTab({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -186,6 +188,8 @@ class DailySalesTab extends StatelessWidget {
 }
 
 class InvoicesTab extends StatelessWidget {
+  const InvoicesTab({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -196,6 +200,8 @@ class InvoicesTab extends StatelessWidget {
 }
 
 class VendorsTab extends StatelessWidget {
+  const VendorsTab({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Center(

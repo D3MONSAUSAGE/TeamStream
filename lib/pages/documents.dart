@@ -1,8 +1,61 @@
 import 'package:flutter/material.dart';
 import 'package:teamstream/widgets/menu_drawer.dart';
+import 'package:teamstream/services/pocketbase/document_service.dart';
+import 'package:teamstream/pages/document_viewer.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class DocumentsPage extends StatelessWidget {
+class DocumentsPage extends StatefulWidget {
   const DocumentsPage({super.key});
+
+  @override
+  DocumentsPageState createState() => DocumentsPageState();
+}
+
+class DocumentsPageState extends State<DocumentsPage> {
+  List<Map<String, dynamic>> documents = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    loadDocuments();
+  }
+
+  /// 🔹 Fetch documents from PocketBase
+  void loadDocuments() async {
+    List<Map<String, dynamic>> fetchedDocuments =
+        await DocumentService.fetchDocuments();
+    setState(() {
+      documents = fetchedDocuments;
+      isLoading = false;
+    });
+  }
+
+  /// 🔹 Open document in Google Docs Viewer
+  void viewDocument(String documentId, String fileName) {
+    String fileUrl = DocumentService.getDocumentUrl(documentId, fileName);
+    
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DocumentViewerPage(fileUrl: fileUrl),
+      ),
+    );
+  }
+
+  /// 🔹 Direct Download
+  void downloadDocument(String documentId, String fileName) async {
+    String fileUrl = DocumentService.getDocumentUrl(documentId, fileName);
+    Uri uri = Uri.parse(fileUrl);
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("❌ Could not download document: $fileName")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,45 +73,24 @@ class DocumentsPage extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Expanded(
-              child: ListView(
-                children: [
-                  _buildDocumentCard(
-                      context,
-                      "Order Pick Up Policy",
-                      "Guidelines for customers and employees on how to handle order pick-ups.",
-                      Icons.assignment),
-                  _buildDocumentCard(
-                      context,
-                      "Uniform Policy",
-                      "Rules regarding employee uniforms, grooming, and professional appearance.",
-                      Icons.work),
-                  _buildDocumentCard(
-                      context,
-                      "Uniform Request Policy",
-                      "Process for requesting new uniforms or replacement items.",
-                      Icons.shopping_cart),
-                  _buildDocumentCard(
-                      context,
-                      "POS Card Policy",
-                      "Proper use and security guidelines for handling POS cards.",
-                      Icons.credit_card),
-                  _buildDocumentCard(
-                      context,
-                      "Return Policy",
-                      "Instructions for processing customer returns and refunds.",
-                      Icons.autorenew),
-                  _buildDocumentCard(
-                      context,
-                      "Raise Policy",
-                      "Details on performance evaluations and raise eligibility.",
-                      Icons.trending_up),
-                  _buildDocumentCard(
-                      context,
-                      "Sexual Harassment Policy",
-                      "Zero tolerance policy for harassment, reporting procedures, and consequences.",
-                      Icons.security),
-                ],
-              ),
+              child: isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : documents.isEmpty
+                      ? const Center(child: Text("No documents available."))
+                      : ListView.builder(
+                          itemCount: documents.length,
+                          itemBuilder: (context, index) {
+                            final document = documents[index];
+                            return _buildDocumentCard(
+                              context,
+                              document['title'],
+                              document['description'] ?? "No description",
+                              Icons.article,
+                              document['id'],
+                              document['file'],
+                            );
+                          },
+                        ),
             ),
           ],
         ),
@@ -67,7 +99,13 @@ class DocumentsPage extends StatelessWidget {
   }
 
   Widget _buildDocumentCard(
-      BuildContext context, String title, String description, IconData icon) {
+    BuildContext context,
+    String title,
+    String description,
+    IconData icon,
+    String documentId,
+    String fileName,
+  ) {
     return Card(
       elevation: 3,
       margin: const EdgeInsets.symmetric(vertical: 8),
@@ -75,13 +113,21 @@ class DocumentsPage extends StatelessWidget {
         leading: Icon(icon, color: Colors.blueAccent),
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text(description),
-        trailing: const Icon(Icons.open_in_new, color: Colors.blue),
-        onTap: () {
-          // ✅ Use the context inside the function properly
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("$title will be available soon.")),
-          );
-        },
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.visibility, color: Colors.green),
+              tooltip: "View Document",
+              onPressed: () => viewDocument(documentId, fileName),
+            ),
+            IconButton(
+              icon: const Icon(Icons.download, color: Colors.blue),
+              tooltip: "Download Document",
+              onPressed: () => downloadDocument(documentId, fileName),
+            ),
+          ],
+        ),
       ),
     );
   }
